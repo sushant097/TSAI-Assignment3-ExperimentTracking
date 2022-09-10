@@ -13,4 +13,6 @@ build:
     - pre-commit      # hooks for applying linters on commit
     - rich            # beautiful text formatting in terminal
     - pytest          # tests
+    - pillow
+    - requests
 

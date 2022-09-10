@@ -78,7 +78,76 @@ _Suggestions are always welcome!_
 <br>
 
 # Assignment Related
-## 01 COG - Container for Machine Learning
+
+## 01 Main Objective
+* Try to integrate pytorch lightning with hydra
+* Understand the flow of control in hydra and different structures
+* Understand different experiments of hydra, how to override arguments
+
+## 02 MakeFile - Build docker container
+```bash
+build:
+	@echo Build docker image...
+	@docker build -t hydracifar .
+```
+Note: `hydracifar` is the docker image name.
+
+My DockerFile:
+```dockerfile
+FROM python:3.9.0-slim-bullseye
+
+
+WORKDIR /opt/src/
+
+RUN pip install https://download.pytorch.org/whl/cpu/torch-1.11.0%2Bcpu-cp39-cp39-linux_x86_64.whl
+
+COPY requirements.txt requirements.txt
+
+Run pip install -r requirements.txt \
+   && rm -rf /root/.cache/pip
+
+COPY . .
+
+
+```
+
+**Use `make build` to build docker image**
+
+## 03 Train
+
+## 3.1 Train without timm model
+#### 3.1.1 Train simply 
+
+`docker run  hydracifar:latest  python3 src/train.py experiment=example.yaml`
+
+#### 3.1.2 Train simply  model and mounting volume of docker container to host and run the docker
+
+```docker run  --mount type=bind,source=`pwd`,target=/opt/src/ hydracifar:latest  python3 src/train.py experiment=example.yaml```
+
+*By that all the logs files and model checkpoint are available in host container.*
+
+## 3.2. Train with any timm model
+
+#### 3.2.1 Train simply with any timm model
+
+`python src/train.py experiment=example_timm.yaml model.net.model_name=resnet50d`
+
+* Here, `model.net.model_name="Any Timm model name"` actually overrides net model_name of `experiment/example_timm.yaml`.
+
+**You can list all the available timm models as:**
+![image](https://user-images.githubusercontent.com/30827903/189490978-7095a2e0-e1d8-4659-b8cc-32b0d99e014f.png)
+
+#### 3.1.2 Train simply with any timm model and mounting volume of docker container to host and run the docker
+
+```docker run  --mount type=bind,source=`pwd`,target=/opt/src/ hydracifar:latest  python3 src/train.py experiment=example_timm.yaml```
+
+
+## 04 Evaluation
+`python3 src/eval.py ckpt_path="opt/src/logs/train/runs/2022-09-10_04-57-46/checkpoints/epoch_007.ckpt"
+`
+
+## 05 COG - Container for Machine Learning
+
 `cog.yaml`
 ```yaml
 build:
@@ -92,41 +161,17 @@ build:
     - hydra-core==1.2.0
     - hydra-colorlog==1.2.0
     - hydra-optuna-sweeper==1.2.0
+    - pillow
+    - requests
 
 
 ```
 
-## 02 MakeFile - Build docker container
-```bash
-build:
-	@echo Build docker image...
-	@docker build -t hydracifar .
-```
-My DockerFile:
-```dockerfile
-FROM python:3.9-slim
+### 5.1 Inference on any timm model with COG
 
-WORKDIR /opt/hydra-cifar
-
-COPY requirements.txt requirements.txt
-
-Run pip install -r requirements.txt
-
-COPY . .
-
-```
-**Use `make build` to build docker image**
-
-## 03 Train
-
-**Mounting Volume of docker container to host and run the docker:**
-
-`docker run  --mount type=bind,source=`pwd`,target=/opt/src/ hydracifar:latest  python3 src/train.py experiment=example.yaml`
-
-
-## 04 Evaluation
-`python3 src/eval.py ckpt_path="opt/src/logs/train/runs/2022-09-10_04-57-46/checkpoints/epoch_007.ckpt"
-`
+**The inference code is written in predict.yaml**
+**Run:**
+`cog predict --model resnet18 --image https://github.com/pytorch/hub/raw/master/images/dog.jpg`
 
 ## Main Ideas Of This Template
 
