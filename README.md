@@ -79,6 +79,13 @@ _Suggestions are always welcome!_
 
 # Assignment Related
 
+* Submited by Group: MlopsLearner
+* Members are: 
+1. Sushant Gautam (me)
+2. Chiranthan cv
+3. Pralay
+4. Sparsh Kedia
+
 ## 01 Main Objective
 * Try to integrate pytorch lightning with hydra
 * Understand the flow of control in hydra and different structures
