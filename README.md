@@ -94,19 +94,20 @@ Note: `hydracifar` is the docker image name.
 
 My DockerFile:
 ```dockerfile
-FROM python:3.9.0-slim-bullseye
+FROM python:3.9-slim-bullseye
 
 
 WORKDIR /opt/src/
-
-RUN pip install https://download.pytorch.org/whl/cpu/torch-1.11.0%2Bcpu-cp39-cp39-linux_x86_64.whl
 
 COPY requirements.txt requirements.txt
 
 Run pip install -r requirements.txt \
    && rm -rf /root/.cache/pip
 
+RUN pip install https://download.pytorch.org/whl/cpu/torch-1.11.0%2Bcpu-cp39-cp39-linux_x86_64.whl
+
 COPY . .
+
 
 
 ```
@@ -115,7 +116,7 @@ COPY . .
 
 ## 03 Train
 
-## 3.1 Train without timm model
+### 3.1 Train without timm model
 #### 3.1.1 Train simply 
 
 `docker run  hydracifar:latest  python3 src/train.py experiment=example.yaml`
@@ -126,11 +127,11 @@ COPY . .
 
 *By that all the logs files and model checkpoint are available in host container.*
 
-## 3.2. Train with any timm model
+### 3.2. Train with any timm model
 
 #### 3.2.1 Train simply with any timm model
 
-`python src/train.py experiment=example_timm.yaml model.net.model_name=resnet50d`
+`docker run hydracifar python3 src/train.py experiment=example_timm.yaml model.net.model_name=resnet50d`
 
 * Here, `model.net.model_name="Any Timm model name"` actually overrides net model_name of `experiment/example_timm.yaml`.
 
@@ -139,7 +140,7 @@ COPY . .
 
 #### 3.1.2 Train simply with any timm model and mounting volume of docker container to host and run the docker
 
-```docker run  --mount type=bind,source=`pwd`,target=/opt/src/ hydracifar:latest  python3 src/train.py experiment=example_timm.yaml```
+```docker run  --mount type=bind,source=`pwd`,target=/opt/src/ hydracifar:latest  python3 src/train.py experiment=example_timm.yaml model.net.model_name=resnet50d```
 
 
 ## 04 Evaluation
@@ -151,27 +152,57 @@ COPY . .
 `cog.yaml`
 ```yaml
 build:
-  python_version: "3.10"
+  python_version: "3.9"
   python_packages:
-    - torch>=1.10.0
-    - torchvision>=0.11.0
+    - torch==1.12.0
+    - torchvision==0.13.0
     - pytorch-lightning==1.7.1
     - torchmetrics==0.9.3
     - timm==0.6.7
     - hydra-core==1.2.0
     - hydra-colorlog==1.2.0
     - hydra-optuna-sweeper==1.2.0
-    - pillow
-    - requests
+    - pyrootutils==1.0.4     # standardizing the project root setup
+    - pre-commit==2.20.0      # hooks for applying linters on commit
+    - rich==12.5.1            # beautiful text formatting in terminal
+    - pytest==7.1.3          # tests
+    - requests==2.28.1
+
+predict: "predict.py:Predictor"
 
 
 ```
 
+**Use `cog run python` to build image**
+
 ### 5.1 Inference on any timm model with COG
 
-**The inference code is written in predict.yaml**
+**Note: The inference code is written in predict.py**.
+
 **Run:**
-`cog predict --model resnet18 --image https://github.com/pytorch/hub/raw/master/images/dog.jpg`
+
+DOWNLOAD AND SAVE IMAGE AS:
+```BASH
+$ IMAGE_URL=https://gist.githubusercontent.com/bfirsh/3c2115692682ae260932a67d93fd94a8/raw/56b19f53f7643bb6c0b822c410c366c3a6244de2/mystery.jpg
+$ curl $IMAGE_URL > input.jpg
+```
+`cog predict -i image=@input.jpg`
+
+Output as:
+```
+Running prediction...
+{
+  "topk": [
+    "tiger cat",
+    "tabby",
+    "Egyptian cat",
+    "lynx",
+    "Persian cat"
+  ]
+}
+```
+To predict the current trained model, we can directly setup in Predictor class of predict.py as: `torch.load('./logs/train/runs/2022-09-10_04-57-46/checkpoints/epoch_007.ckpt')`
+ and run the prediction on trained model.
 
 ## Main Ideas Of This Template
 
