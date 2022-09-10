@@ -1,6 +1,6 @@
 <div align="center">
 
-# Lightning-Hydra-Template
+# Lightning-Hydra-Cifar10-Timm Template
 
 [![python](https://img.shields.io/badge/-Python_3.7_%7C_3.8_%7C_3.9_%7C_3.10-blue?logo=python&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![pytorch](https://img.shields.io/badge/PyTorch_1.8+-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/get-started/locally/)
@@ -76,6 +76,57 @@ _Suggestions are always welcome!_
 [Hydra](https://github.com/facebookresearch/hydra) - a framework for elegantly configuring complex applications. The key feature is the ability to dynamically create a hierarchical configuration by composition and override it through config files and the command line.
 
 <br>
+
+# Assignment Related
+## 01 COG - Container for Machine Learning
+`cog.yaml`
+```yaml
+build:
+  python_version: "3.10"
+  python_packages:
+    - torch>=1.10.0
+    - torchvision>=0.11.0
+    - pytorch-lightning==1.7.1
+    - torchmetrics==0.9.3
+    - timm==0.6.7
+    - hydra-core==1.2.0
+    - hydra-colorlog==1.2.0
+    - hydra-optuna-sweeper==1.2.0
+
+
+```
+
+## 02 MakeFile - Build docker container
+```bash
+build:
+	@echo Build docker image...
+	@docker build -t hydracifar .
+```
+My DockerFile:
+```dockerfile
+FROM python:3.9-slim
+
+WORKDIR /opt/hydra-cifar
+
+COPY requirements.txt requirements.txt
+
+Run pip install -r requirements.txt
+
+COPY . .
+
+```
+**Use `make build` to build docker image**
+
+## 03 Train
+
+**Mounting Volume of docker container to host and run the docker:**
+
+`docker run  --mount type=bind,source=`pwd`,target=/opt/src/ hydracifar:latest  python3 src/train.py experiment=example.yaml`
+
+
+## 04 Evaluation
+`python3 src/eval.py ckpt_path="opt/src/logs/train/runs/2022-09-10_04-57-46/checkpoints/epoch_007.ckpt"
+`
 
 ## Main Ideas Of This Template
 
@@ -386,12 +437,12 @@ python train.py -m datamodule.batch_size=32,64,128 model.lr=0.001,0.0005
 <summary><b>Create a sweep over hyperparameters with Optuna</b></summary>
 
 ```bash
-# this will run hyperparameter search defined in `configs/hparams_search/mnist_optuna.yaml`
+# this will run hyperparameter search defined in `configs/hparams_search/cifar_optuna.yaml`
 # over chosen experiment config
 python train.py -m hparams_search=mnist_optuna experiment=example
 ```
 
-> **Note**: Using [Optuna Sweeper](https://hydra.cc/docs/next/plugins/optuna_sweeper) doesn't require you to add any boilerplate to your code, everything is defined in a [single config file](configs/hparams_search/mnist_optuna.yaml).
+> **Note**: Using [Optuna Sweeper](https://hydra.cc/docs/next/plugins/optuna_sweeper) doesn't require you to add any boilerplate to your code, everything is defined in a [single config file](configs/hparams_search/cifar_optuna.yaml).
 
 > **Warning**: Optuna sweeps are not failure-resistant (if one job crashes then the whole sweep crashes).
 
@@ -516,7 +567,7 @@ Suggestions for improvements are always welcome!
 All PyTorch Lightning modules are dynamically instantiated from module paths specified in config. Example model config:
 
 ```yaml
-_target_: src.models.mnist_model.MNISTLitModule
+_target_: src.models.mnist_model.CIFARLitModule
 lr: 0.001
 net:
   _target_: src.models.components.simple_dense_net.SimpleDenseNet
@@ -558,8 +609,8 @@ It determines how config is composed when simply executing command `python train
 # order of defaults determines the order in which configs override each other
 defaults:
   - _self_
-  - datamodule: mnist.yaml
-  - model: mnist.yaml
+  - datamodule: cifar.yaml
+  - model: cifar.yaml
   - callbacks: default.yaml
   - logger: null # set logger here or use command line (e.g. `python train.py logger=csv`)
   - trainer: default.yaml
@@ -625,8 +676,8 @@ For example, you can use them to version control best hyperparameters for each c
 # python train.py experiment=example
 
 defaults:
-  - override /datamodule: mnist.yaml
-  - override /model: mnist.yaml
+  - override /datamodule: cifar.yaml
+  - override /model: cifar.yaml
   - override /callbacks: default.yaml
   - override /trainer: default.yaml
 
@@ -667,8 +718,8 @@ logger:
 
 **Basic workflow**
 
-1. Write your PyTorch Lightning module (see [models/mnist_module.py](src/models/mnist_module.py) for example)
-2. Write your PyTorch Lightning datamodule (see [datamodules/mnist_datamodule.py](src/datamodules/mnist_datamodule.py) for example)
+1. Write your PyTorch Lightning module (see [models/mnist_module.py](src/models/cifar_module.py) for example)
+2. Write your PyTorch Lightning datamodule (see [datamodules/mnist_datamodule.py](src/datamodules/cifar_datamodule.py) for example)
 3. Write your experiment config, containing paths to model and datamodule
 4. Run training with chosen experiment config:
    ```bash
@@ -738,7 +789,7 @@ You can use many of them at once (see [configs/logger/many_loggers.yaml](configs
 
 You can also write your own logger.
 
-Lightning provides convenient method for logging custom metrics from inside LightningModule. Read the [docs](https://pytorch-lightning.readthedocs.io/en/latest/extensions/logging.html#automatic-logging) or take a look at [MNIST example](src/models/mnist_module.py).
+Lightning provides convenient method for logging custom metrics from inside LightningModule. Read the [docs](https://pytorch-lightning.readthedocs.io/en/latest/extensions/logging.html#automatic-logging) or take a look at [MNIST example](src/models/cifar_module.py).
 
 <br>
 
@@ -887,7 +938,7 @@ some_param: ${datamodule.some_param}
 Another approach is to access datamodule in LightningModule directly through Trainer:
 
 ```python
-# ./src/models/mnist_module.py
+# ./src/models/cifar_module.py
 def on_train_start(self):
   self.some_param = self.trainer.datamodule.some_param
 ```
@@ -1181,7 +1232,6 @@ This template was inspired by:
 
 Useful repositories:
 
-- [jxpress/lightning-hydra-template-vertex-ai](https://github.com/jxpress/lightning-hydra-template-vertex-ai) - lightning-hydra-template integration with Vertex AI hyperparameter tuning and custom training job
 - [pytorch/hydra-torch](https://github.com/pytorch/hydra-torch) - safely configuring PyTorch classes with Hydra
 - [romesco/hydra-lightning](https://github.com/romesco/hydra-lightning) - safely configuring PyTorch Lightning classes with Hydra
 - [PyTorchLightning/lightning-transformers](https://github.com/PyTorchLightning/lightning-transformers) - official Lightning Transformers repo built with Hydra

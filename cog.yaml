@@ -1,0 +1,16 @@
+build:
+  python_version: "3.10"
+  python_packages:
+    - torch>=1.10.0
+    - torchvision>=0.11.0
+    - pytorch-lightning==1.7.1
+    - torchmetrics==0.9.3
+    - timm==0.6.7
+    - hydra-core==1.2.0
+    - hydra-colorlog==1.2.0
+    - hydra-optuna-sweeper==1.2.0
+    - pyrootutils     # standardizing the project root setup
+    - pre-commit      # hooks for applying linters on commit
+    - rich            # beautiful text formatting in terminal
+    - pytest          # tests
+
