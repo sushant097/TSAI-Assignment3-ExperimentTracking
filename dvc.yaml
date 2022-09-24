@@ -1,0 +1,5 @@
+stages:
+  train-mnist:
+    cmd: python src/train.py experiment=mnist
+    deps:
+      - data/MNIST

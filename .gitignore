@@ -138,6 +138,7 @@ dmypy.json
 
 # JetBrains
 .idea/
+venv
 
 # Data & Models
 *.h5
@@ -150,3 +151,4 @@ data/
 logs/
 .env
 .autoenv
+/data

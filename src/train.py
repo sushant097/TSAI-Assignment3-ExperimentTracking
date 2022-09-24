@@ -90,6 +90,7 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
         log.info("Logging hyperparameters!")
         utils.log_hyperparameters(object_dict)
 
+
     if cfg.get("train"):
         log.info("Starting training!")
         trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
@@ -123,6 +124,7 @@ def main(cfg: DictConfig) -> Optional[float]:
     metric_value = utils.get_metric_value(
         metric_dict=metric_dict, metric_name=cfg.get("optimized_metric")
     )
+    print("Returning metric value: ", metric_value)
 
     # return optimized metric
     return metric_value
