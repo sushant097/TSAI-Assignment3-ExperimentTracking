@@ -187,9 +187,7 @@ optimizer:
 
 This train the hyperparameter search by optuna on gpu as device.
 
-`!python src/train.py  -m trainer=gpu hparams_search=cifar_optuna `
-
-**My Final Optuna sweeper parameter search output: **
+**My Final Optuna sweeper parameter search output:**
 ```bash
 name: optuna
 best_params:
