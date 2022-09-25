@@ -97,7 +97,7 @@ hydra:
     direction: maximize
 
     # total number of runs that will be executed
-    n_trials: 10
+    n_trials: 5
 
     # choose Optuna hyperparameter sampler
     # you can choose bayesian sampler (tpe), random search (without optimization), grid sampler, and others
@@ -109,9 +109,10 @@ hydra:
 
     # define hyperparameter search space
     params:
-      model.optimizer._target_: choice(torch.optim.Adam, torch.optim.SGD, torch.optim.RMSProp)
+      model.optimizer._target_: choice(torch.optim.Adam, torch.optim.SGD, torch.optim.RMSprop)
       model.optimizer.lr: interval(0.0001, 0.1)
-      datamodule.batch_size: choice(8, 16, 24)
+      datamodule.batch_size: choice(32, 64, 128)
+
 ```
 #### Train.yaml
 ```bash
@@ -186,17 +187,33 @@ optimizer:
 
 This train the hyperparameter search by optuna on gpu as device.
 
-`!python src/train.py  -m trainer=gpu hparams_search=cifar_optuna model_name=resnet18`
+`!python src/train.py  -m trainer=gpu hparams_search=cifar_optuna `
 
-We can pass any timm model name where hyperparameter search takes place by overriding `model_name` argument.
+**My Final Optuna sweeper parameter search output: **
+```bash
+name: optuna
+best_params:
+  model.optimizer._target_: torch.optim.SGD
+  model.optimizer.lr: 0.03584594526879088
+  datamodule.batch_size: 128
+best_value: 0.8082000017166138
 
-
+```
 ### Push model, logs and data to google drive (using dvc)
 1. Untrack logs from git : `git rm -r --cached logs`
 2. Add logs to dvc: `dvc add logs`
-3. Add a remote: `dvc remote add gdrive gdrive://gdrive_url`
+2.1. `git add . ` and `dvc config core.autostage true` : As logs folder from being tracked by git and then let dvc take care of it
+3. Add a remote: `dvc remote add gdrive gdrive://1-p0CkpB65Cd1oplleRc19JRFpYshO7t7`
 4. Push logs and other tracked files by dvc in gdrive: `dvc push -r gdrive`
 5. Now, whenever logs is deleted then, we can directly pull logs from dvc as: `dvc pull -r gdrive`
 
 ### Tensorboard 
 `tensorboard --logdir logs/train --bind_all`
+
+### Tensorboard Dev
+```bash
+tensorboard dev upload --logdir logs \
+    --name "My Cifar10 optuna sweeper TSAI Assignment3 experiment" \
+    --description "Visualization of several hyperparameters"
+```
+**My Tensorboard logs at: https://tensorboard.dev/experiment/qfR3Lv2DRc6YgJb8K4ZzCg/**
