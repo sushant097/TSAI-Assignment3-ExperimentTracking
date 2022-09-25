@@ -198,3 +198,5 @@ We can pass any timm model name where hyperparameter search takes place by overr
 4. Push logs and other tracked files by dvc in gdrive: `dvc push -r gdrive`
 5. Now, whenever logs is deleted then, we can directly pull logs from dvc as: `dvc pull -r gdrive`
 
+### Tensorboard 
+`tensorboard --logdir logs/train --bind_all`
