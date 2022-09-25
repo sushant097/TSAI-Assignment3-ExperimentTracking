@@ -14,8 +14,9 @@
 </div>
 
 ## Description
+This repository related to data tracking and experimentation. We use dvc to save the use files like logs, models in the 
+separate destination like Google Drive, or any other place whereas git adds the code to the repository. 
 
-What it does
 
 ## How to run
 
@@ -23,8 +24,8 @@ Install dependencies
 
 ```bash
 # clone project
-git clone https://github.com/YourGithubName/your-repo-name
-cd your-repo-name
+git clone https://github.com/sushant097/TSAI-Assignment3-ExperimentTracking
+cd TSAI-Assignment3-ExperimentTracking
 
 # [OPTIONAL] create conda environment
 conda create -n myenv python=3.9
