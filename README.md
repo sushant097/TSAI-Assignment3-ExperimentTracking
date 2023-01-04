@@ -201,10 +201,11 @@ best_value: 0.8082000017166138
 ### Push model, logs and data to google drive (using dvc)
 1. Untrack logs from git : `git rm -r --cached logs`
 2. Add logs to dvc: `dvc add logs`
-2.1. `git add . ` and `dvc config core.autostage true` : As logs folder from being tracked by git and then let dvc take care of it
-3. Add a remote: `dvc remote add gdrive gdrive://DRIVE_ID`
-4. Push logs and other tracked files by dvc in gdrive: `dvc push -r gdrive`
-5. Now, whenever logs is deleted then, we can directly pull logs from dvc as: `dvc pull -r gdrive`
+     
+     2.1. `git add . ` and `dvc config core.autostage true` : As logs folder from being tracked by git and then let dvc take care of it
+4. Add a remote: `dvc remote add gdrive gdrive://GDRIVE_FOLDER_ID`
+5. Push logs and other tracked files by dvc in gdrive: `dvc push -r gdrive`
+6. Now, whenever logs is deleted then, we can directly pull logs from dvc as: `dvc pull -r gdrive`
 
 ### Tensorboard 
 `tensorboard --logdir logs/train --bind_all`
